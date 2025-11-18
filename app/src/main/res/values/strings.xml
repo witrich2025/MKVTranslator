@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">MKV Subtitle Extractor</string>
+    <string name="app_title">MKV Subtitle Extractor</string>
+    
+    <!-- Main Activity -->
+    <string name="select_mkv_file">Select an MKV file to extract subtitles</string>
+    <string name="browse_files">Browse Files</string>
+    <string name="no_file_selected">No file selected</string>
+    <string name="waiting_for_file">Waiting for file selection...</string>
+    <string name="select_file">Select MKV File</string>
+    
+    <!-- Extraction and Translation -->
+    <string name="extract_subtitles">Extract Subtitles</string>
+    <string name="translate_subtitles">Translate Subtitles</string>
+    <string name="translate_subtitle">Translate Subtitles to:</string>
+    <string name="translate">Translate</string>
+    
+    <!-- Subtitle Display Activity -->
+    <string name="subtitles_title">Extracted Subtitles</string>
+    <string name="back">Back</string>
+    <string name="save">Save</string>
+    <string name="no_subtitles">No subtitles found in the selected file.</string>
+    
+    <!-- Status Messages -->
+    <string name="extraction_failed">Extraction failed. Please check the file and try again.</string>
+    <string name="translation_failed">Translation failed. Please check your internet connection.</string>
+    <string name="permission_denied">Permission denied. Please grant storage permission.</string>
+    <string name="select_file_first">Please select a file first</string>
+    <string name="extract_first">Please extract subtitles first</string>
+    <string name="subtitles_extracted">Subtitles extracted successfully!</string>
+    <string name="subtitles_saved">Subtitles saved successfully!</string>
+    <string name="translating">Translating subtitles...</string>
+    <string name="extracting">Extracting subtitles...</string>
+    
+    <!-- Info Section -->
+    <string name="info_title">How to use:</string>
+    <string name="info_description">1. Click "Browse Files" to select an MKV file\n2. Click "Extract Subtitles" to extract subtitle tracks\n3. Select a target language from the dropdown\n4. Click "Translate" to translate the subtitles\n5. Review and save the translated subtitles\n\nSupported formats: SRT, ASS, SSA\n\nNote: Internet connection required for translation.</string>
+</resources>

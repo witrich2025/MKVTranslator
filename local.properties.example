@@ -1,0 +1,6 @@
+# Copia este archivo a local.properties y actualiza la ruta del SDK
+# Ejemplo para Ubuntu
+sdk.dir=/home/<tu-usuario>/Android/Sdk
+
+# Para Windows usa ruta como:
+# sdk.dir=C:\\Users\\<tu-usuario>\\AppData\\Local\\Android\\Sdk
