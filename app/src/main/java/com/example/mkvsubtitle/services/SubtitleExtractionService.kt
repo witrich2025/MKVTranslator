@@ -39,34 +39,46 @@ suspend fun extractSubtitles(mkvFilePath: String, outputDir: String): Extraction
             val outputFile = File(outputDirectory, "subtitle_0.srt")
 
             val command = "-y -i \"${inputFile.absolutePath}\" -map 0:s:0 -c:s srt \"${outputFile.absolutePath}\""
-            val session = try {
+            val session: Any? = try {
                 // Try real FFmpegKit via reflection (if available)
                 val ffmpegClass = Class.forName("com.arthenica.ffmpegkit.FFmpegKit")
                 val method = ffmpegClass.getMethod("execute", String::class.java)
-                method.invoke(null, command)?.let { sessionObj ->
-                    // sessionObj should have returnCode property
-                    sessionObj
-                }
+                method.invoke(null, command)
             } catch (e: Throwable) {
                 // Fall back to stub
                 FFmpegKitStub.execute(command)
             }
 
-            val returnCode = try {
-                val rcField = session?.javaClass?.getMethod("getReturnCode")
-                rcField?.invoke(session) as? Int ?: (session as? FFmpegKitStub.Session)?.returnCode
+            val returnCode: Int? = try {
+                val getReturnCodeMethod = session?.javaClass?.getMethod("getReturnCode")
+                val rcObj = getReturnCodeMethod?.invoke(session)
+                when (rcObj) {
+                    is Int -> rcObj
+                    else -> {
+                        rcObj?.let {
+                            try {
+                                val getValue = it.javaClass.getMethod("getValue")
+                                getValue.invoke(it) as? Int
+                            } catch (e: Throwable) {
+                                null
+                            }
+                        } ?: (session as? FFmpegKitStub.Session)?.returnCode
+                    }
+                }
             } catch (e: Throwable) {
                 (session as? FFmpegKitStub.Session)?.returnCode
             }
 
-            if ((try { 
-                    // Try real ReturnCode.isSuccess
-                    val rcClass = Class.forName("com.arthenica.ffmpegkit.ReturnCode")
-                    val isSuccess = rcClass.getMethod("isSuccess", Any::class.java)
-                    isSuccess.invoke(null, returnCode)
-                } catch (e: Throwable) { 
-                    FFmpegKitStub.ReturnCode.isSuccess(returnCode)
-                }) && outputFile.exists()) {
+            val success: Boolean = try {
+                val rcClass = Class.forName("com.arthenica.ffmpegkit.ReturnCode")
+                val isSuccess = rcClass.getMethod("isSuccess", java.lang.Integer::class.java)
+                val res = isSuccess.invoke(null, returnCode ?: -1)
+                (res as? Boolean) ?: false
+            } catch (e: Throwable) {
+                FFmpegKitStub.ReturnCode.isSuccess(returnCode)
+            }
+
+            if (success && outputFile.exists()) {
                 val track = SubtitleTrack(
                     index = 0,
                     language = "unknown",
