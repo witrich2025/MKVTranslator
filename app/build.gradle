@@ -27,7 +27,9 @@ android {
     // Otras dependencias que ya tienes...
     
     // FFmpeg Android - Versión estable
-    implementation 'com.arthenica:ffmpeg-kit-full:4.5.1-1'
+    // FFmpeg Android - Versión estable
+    // Temporarily disabled in CI because maven.ffmpegkit.com sometimes isn't resolvable.
+    // implementation 'com.arthenica:ffmpeg-kit-full:4.5.1-1'
 
     // Gson
     implementation 'com.google.code.gson:gson:2.10.1'
