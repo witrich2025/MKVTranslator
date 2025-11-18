@@ -11,9 +11,9 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
-        maven { url 'https://jitpack.io' }
-        // Repositorio de FFmpegKit
+        // Repositorio de FFmpegKit (prefer this before jitpack)
         maven { url 'https://maven.ffmpegkit.com/release' }
+        maven { url 'https://jitpack.io' }
     }
 }
 

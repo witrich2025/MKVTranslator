@@ -52,6 +52,11 @@ jobs:
       - name: Make gradlew executable
         run: chmod +x ./gradlew
 
+      - name: Write local.properties
+        run: |
+          ANDROID_SDK_ROOT="$RUNNER_TEMP/android-sdk"
+          echo "sdk.dir=$ANDROID_SDK_ROOT" > local.properties
+
       - name: Build debug APK
         run: ./gradlew assembleDebug --console=plain
 
