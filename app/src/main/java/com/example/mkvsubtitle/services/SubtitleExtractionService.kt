@@ -1,9 +1,12 @@
 package com.example.mkvsubtitle.services
 
 import android.content.Context
-import com.arthenica.ffmpegkit.FFmpegKit
-import com.arthenica.ffmpegkit.FFmpegKitConfig
-import com.arthenica.ffmpegkit.ReturnCode
+// FFmpegKit imports are optional - if the dependency is disabled we use a local stub
+// real imports are commented out when dependency is removed
+// import com.arthenica.ffmpegkit.FFmpegKit
+// import com.arthenica.ffmpegkit.FFmpegKitConfig
+// import com.arthenica.ffmpegkit.ReturnCode
+import com.example.mkvsubtitle.utils.FFmpegKitStub
 import com.example.mkvsubtitle.models.ExtractionResponse
 import com.example.mkvsubtitle.models.SubtitleTrack
 import kotlinx.coroutines.Dispatchers
@@ -36,10 +39,34 @@ suspend fun extractSubtitles(mkvFilePath: String, outputDir: String): Extraction
             val outputFile = File(outputDirectory, "subtitle_0.srt")
 
             val command = "-y -i \"${inputFile.absolutePath}\" -map 0:s:0 -c:s srt \"${outputFile.absolutePath}\""
-            val session = FFmpegKit.execute(command)
-            val returnCode = session.returnCode
+            val session = try {
+                // Try real FFmpegKit via reflection (if available)
+                val ffmpegClass = Class.forName("com.arthenica.ffmpegkit.FFmpegKit")
+                val method = ffmpegClass.getMethod("execute", String::class.java)
+                method.invoke(null, command)?.let { sessionObj ->
+                    // sessionObj should have returnCode property
+                    sessionObj
+                }
+            } catch (e: Throwable) {
+                // Fall back to stub
+                FFmpegKitStub.execute(command)
+            }
 
-            if (ReturnCode.isSuccess(returnCode) && outputFile.exists()) {
+            val returnCode = try {
+                val rcField = session?.javaClass?.getMethod("getReturnCode")
+                rcField?.invoke(session) as? Int ?: (session as? FFmpegKitStub.Session)?.returnCode
+            } catch (e: Throwable) {
+                (session as? FFmpegKitStub.Session)?.returnCode
+            }
+
+            if ((try { 
+                    // Try real ReturnCode.isSuccess
+                    val rcClass = Class.forName("com.arthenica.ffmpegkit.ReturnCode")
+                    val isSuccess = rcClass.getMethod("isSuccess", Any::class.java)
+                    isSuccess.invoke(null, returnCode)
+                } catch (e: Throwable) { 
+                    FFmpegKitStub.ReturnCode.isSuccess(returnCode)
+                }) && outputFile.exists()) {
                 val track = SubtitleTrack(
                     index = 0,
                     language = "unknown",
@@ -56,11 +83,11 @@ suspend fun extractSubtitles(mkvFilePath: String, outputDir: String): Extraction
                     subtitles = listOf(track)
                 )
             } else {
-                ExtractionResponse(
-                    success = false,
-                    message = "Failed to extract subtitles",
-                    error = "FFmpeg returned non-zero exit code: $rc"
-                )
+                    ExtractionResponse(
+                        success = false,
+                        message = "Failed to extract subtitles",
+                        error = "FFmpeg returned non-zero exit code: $returnCode"
+                    )
             }
         }
     } catch (e: Exception) {
